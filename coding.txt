@@ -1,0 +1,102 @@
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+#include <LiquidCrystal.h>
+const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+const int sensorone=A5;
+
+
+
+
+/*
+   This sample sketch demonstrates the normal use of a TinyGPS++ (TinyGPSPlus) object.
+   It requires the use of SoftwareSerial, and assumes that you have a
+   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
+*/
+static const int RXPin = 8, TXPin = 9;
+static const uint32_t GPSBaud = 9600;
+
+// The TinyGPS++ object
+TinyGPSPlus gps;
+
+// The serial connection to the GPS device
+SoftwareSerial ss(RXPin, TXPin);
+
+void setup()
+{
+  pinMode(sensorone,INPUT);        
+    lcd.begin(16, 2);        
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(" SMART ACCIDENT");
+    lcd.setCursor(0,1);
+    lcd.print("  ALERT SYSTEM");
+  delay(2000); 
+  Serial.begin(115200);
+  ss.begin(GPSBaud); 
+}
+
+void loop()
+{
+  
+  
+  
+  // This sketch displays information every time a new sentence is correctly encoded.
+  while (ss.available() > 0)
+    if (gps.encode(ss.read()))
+      displayInfo();
+
+  if (millis() > 5000 && gps.charsProcessed() < 10)
+  {
+    Serial.println(F("No GPS detected: check wiring."));
+    while(true);
+  }
+
+
+  
+}
+
+void displayInfo()
+{
+  
+  if (gps.location.isValid())
+  {
+
+    
+    
+   
+    int sensor_onevlue= analogRead(sensorone);
+    
+    //Serial.println(sensor_threelue);
+    if(sensor_onevlue>200)
+    {
+      
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("   WARNNING");                
+      lcd.setCursor(0,1);
+      lcd.print("ACCIDENT OCCURED");
+      delay(2000); 
+      lcd.clear();               
+      lcd.setCursor(0,0);
+      lcd.print("Lati: ");  
+      lcd.print(gps.location.lat(), 6);  
+      lcd.setCursor(0,1);
+      lcd.print("Long: ");  
+      lcd.print(gps.location.lng(), 6);                
+      Serial.print(gps.location.lat(), 6);
+      Serial.print(F(","));
+      Serial.print(gps.location.lng(), 6);
+
+      delay(2000); 
+      
+    }    
+  
+  
+  delay(2000);
+  
+  }
+  
+
+
+}
